@@ -1,0 +1,39 @@
+import { test, expect } from '@playwright/test';
+
+test.describe('Registration', () => {
+    test('Check that the User can register on the site and login with received credential', async ({ page }) => {
+
+         page.goto('https://demo.nocobase.com/new');
+         page.locator("css=[type='text']").fill('Annet@mailinator.com');
+
+        page.getByTestId("select-single").click();
+                //await expect (industryField.getByText('Technology & Internet')).toBeVisible();
+        industryField.then.("Technology & Internet");
+
+        const userScaleField = page.locator("css=('#rc_select_5')");
+         userScaleField.click();
+        //await expect (userScaleField.getByText('Personal Use')).toBeVisible();
+         userScaleField.selectOption('Personal Use');
+
+        const yourJobTitleField = page.locator("css=('#rc_select_6')");
+         yourJobTitleField.click();
+        //await expect (yourJobTitleField.getByText('Engineer')).toBeVisible();
+         yourJobTitleField.selectOption("Engineer");
+
+        const whatDoYouWantField = page.locator("css=('.ant-formily-item-control-content .ant-formily-item-control-content-component .ant-input.css-19t1yef')");
+         whatDoYouWantField.fill("Just for testing");
+
+        const howDoYouFindField = page.locator("css=('.ant-select-selection-overflow')");
+         howDoYouFindField.click();
+         howDoYouFindField.selectOption("Other");
+
+        const deployButton = page.locator("css=('[aria-label='action-Action-Deploy Now-applicationForms']");
+         deployButton.click();
+
+         expect(page.getByRole('alert')).toHaveText("Demo site deployed successfully!");
+
+  
+    });
+});
+
+
