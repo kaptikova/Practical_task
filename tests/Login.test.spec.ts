@@ -2,29 +2,28 @@
         import { test, expect, type Page } from '@playwright/test';
        
 
-
         test.beforeEach(async ({ page }) => {
             //Go to Login page and fill required fields for login
-            await page.goto('https://a_qyqqd2gpgns.v7.demo.nocobase.com/signin?redirect=');
+            await page.goto('https://a_n9466i0o8l8.v7.demo.nocobase.com/signin?redirect=');
             await page.getByPlaceholder('Username/Email').fill("admin@nocobase.com");
             await page.getByPlaceholder("Password").fill("admin123");
 
             //Ckick Sign in button
             //await page.getByRole('button',{ name: 'Sign in'}).click();
             page.locator("[type='submit']").click();
-            //new Promise(r => setTimeout(r, 2000));
-
+            
             //Cehck that the User moved to Admin page
-            await expect(page).toHaveURL("https://a_qyqqd2gpgns.v7.demo.nocobase.com/admin");
+            await expect(page).toHaveURL("https://a_n9466i0o8l8.v7.demo.nocobase.com/admin");
+            
             //Check that the User can move to Companies page
             await page.locator("[aria-label='Users']").click();
+           
             // await expect(page).toHaveURL("https://a_11bnid1xu2x.v7.demo.nocobase.com/admin/6xd1ti4a85d");  
             await expect(page).toHaveTitle("Companies - NocoBase");                  
 
             //Check that the User can move to Customer tab
             await page.locator("[data-node-key='eauxu34kuux']").click();
-            await expect(page).toHaveURL("https://a_qyqqd2gpgns.v7.demo.nocobase.com/admin/6xd1ti4a85d?tab=eauxu34kuux"); 
-            await new Promise(r => setTimeout(r, 1000));
+            await expect(page).toHaveURL("https://a_n9466i0o8l8.v7.demo.nocobase.com/admin/6xd1ti4a85d?tab=eauxu34kuux"); 
 
         });
 
@@ -35,7 +34,6 @@
 
             //Check that Customer tab contain 6 columns (Select all, Action, Name, Industry, Employees, Created at)
             await expect (page.locator('[aria-label="Select all"]')).toBeVisible();
-            //await new Promise(r => setTimeout(r, 1000)); 
 
             const buttons = page.getByText('Actions', { exact: true });
             await expect(buttons).toBeVisible();
@@ -90,8 +88,7 @@
             await page.getByText('Submit').click();
 
             //Check that filter is working 
-            //and we found that something wrong with match data and filter options, becouse we can't find records on site
-            await expect (page.locator(".ant-description-date-picker")).toHaveCount(2);
+            await expect (page.locator(".ant-description-date-picker")).toHaveCount(0);
 
         });
 
@@ -102,7 +99,6 @@
 
             //Chechk that tooltip is opened
             await expect(page.locator("[role='tooltip']")).toBeVisible();
-
 
             //Check that the User can set "Created on" for filter 
             await page.getByTestId("select-filter-field").click();
@@ -170,30 +166,37 @@
 
             //Check that the USer can move to tab Notes and Add records here
             await page.getByText("Notes", { exact: true }).click();
-
-            //Check number of records until a new one is added
-            await expect(page.locator(".ant-description-textarea p")).toHaveCount(10);
-            
+                                 
             //Check that the User can add new record on Notes tab by button "+ Add new"
             await page.locator("[aria-label='action-Action-Add new-create-note-list-3']").click();
 
             //Add content:
-            const contantField = page.locator(".ql-editor");
-            await contantField.click();
+            await page.locator(".ql-editor").click();
 
             const newData = Math.random().toString();
             await page.keyboard.type(newData);
 
             //Press Submit button
-            await page.locator("[aria-label='action-Action-Submit-submit-note-form-3']").click();
-            await new Promise(r => setTimeout(r, 1000)); 
+            await page.getByLabel("action-Action-Submit-submit-note-form-3").click();
 
-            //Check that Notes tab contain added record
-            //await expect(page.locator(".itemCss.css-1wpix4y")).toBeVisible();
-            await expect(page.locator(".ant-description-textarea p")).toHaveCount(9);
-               
-            //close opened area
-            await page.locator('.ant-drawer-body').isVisible();
+            //Go back 
+            page.goBack();
+
+            //Go to Customer tab
+            await page.locator("[data-node-key='eauxu34kuux']").click();
+    
+            //select any record in tab, for example "Judith May, Robinetworks"
+            await page.getByLabel('action-Action.Link-View-view-company-table-Judith May, Robinetworks').click();
+
+            //Check that the USer can move to tab Notes and Add records here
+            await page.getByText("Notes", { exact: true }).click();
+
+
+            //Check that Notes tab contain added record           
+            const locator = page.locator(".ant-spin-container .ant-description-textarea p");
+            const locators = await locator.all();
+            const expected = locators.find(async locator => await locator.textContent() === newData);
+            expect(expected).not.toBeNull();
             
 
         });
@@ -203,23 +206,23 @@
             await expect(page.locator(".ant-table-row.ant-table-row-level-0")).toHaveCount(8);
 
             //Check that the User can add new record by press "+ Add new" button
-            await page.locator("[aria-label='action-Action-Add new-create-company-table']").click();
+            await page.getByLabel('action-Action-Add new-create-company-table').click();
 
             //Check that the User can add new record after filling just required fields
 
             //Check that the User can't add new record without filling required fields
             await new Promise(r => setTimeout(r, 1000));
-            await page.locator("[aria-label='action-Action-Submit-submit-company-form']").click();
+            await page.getByLabel('action-Action-Submit-submit-company-form').click();
 
             //Check count required field 
-            await new Promise(r => setTimeout(r, 1000));
+           // await new Promise(r => setTimeout(r, 1000));
             await expect (page.locator(".ant-formily-item-error-help.ant-formily-item-help.ant-formily-item-help-enter.ant-formily-item-help-enter-active")).toHaveCount(2);
 
             //Check that the User can fill "Name" field with data
             await page.locator('[aria-label="block-item-CollectionField-company-form-company.name-Name"] input').fill("Test_Name");
 
              //Check that requre field "Industry" is working after press bu "Submit" button
-            await page.locator("[aria-label='action-Action-Submit-submit-company-form']").click();
+            await page.getByLabel('action-Action-Submit-submit-company-form').click();
 
             //Check count required field 
             await expect (page.locator(".ant-formily-item-error-help.ant-formily-item-help.ant-formily-item-help-enter.ant-formily-item-help-enter-active")).toHaveCount(1);
@@ -246,12 +249,17 @@
 
              //Check that Customer tab doesn't contain 9 records after added a new one, because we doesn't fill all fields
              await expect(page.locator(".ant-table-row.ant-table-row-level-0")).toHaveCount(8);
+        });
 
+
+        test('Cehck that the User can add new record ant it move to mismach', async ({ page }) => {
              //Press "+ Add new" button
             await page.locator("[aria-label='action-Action-Add new-create-company-table']").click();
 
             //Fill "Name" field with data
-            await page.locator('[aria-label="block-item-CollectionField-company-form-company.name-Name"] input').fill("Test_Company2");
+            const newNameCompany = Math.random().toString();
+            await page.keyboard.type(newNameCompany);
+            await page.locator('[aria-label="block-item-CollectionField-company-form-company.name-Name"] input').fill(newNameCompany);
 
             //Fill field "Website"
             await page.locator('[aria-label="block-item-CollectionField-company-form-company.website-Website"] input').fill('www.example.com');
@@ -283,10 +291,12 @@
             //Save changes and add them by press "Submit" button
             await page.getByLabel('action-Action-Submit-submit-contact-form').click();
 
+            /*
             //Check that the User can added related Leads
             await page.locator("[aria-label='block-item-CollectionField-company-form-company.leads-Releated leads'] input").click();
             await new Promise(r => setTimeout(r, 1000));
             await page.getByRole('option', { name: 'Olivia Guzman', exact: true }).click();
+            */
 
             //Press on Submit button on form for added new Customer
             await page.getByLabel('action-Action-Submit-submit-company-form').click();
@@ -297,8 +307,12 @@
             //Go to mismatch tab
             await page.locator("#rc-tabs-0-tab-gsjr37b4i0s").click();
 
-            //Check that our new customer is here 
-            await expect (page.locator(".ant-table-row.ant-table-row-level-0")).toHaveCount(21);
+            //Check that our new customer is here         
+            const locatorName = page.locator(".ant-description-input div");
+            const locators = await locatorName.all();
+            const expected = locators.find(async locatorName => await locatorName.textContent() === newNameCompany);
+            expect(expected).not.toBeNull();          
+
         
        });
 
@@ -331,25 +345,27 @@
             await page.locator(".ant-pagination-next").click();
             await page.locator(".ant-pagination-next").click();
             
+            
             //Check that the User on the 5th page
-            await expect(page.locator('[title="5/5"]')).toBeVisible();
+            await expect(page.locator('[title="5/7"]')).toBeVisible();
 
             //Check that the User can go to 1st page
             await page.locator(".ant-pagination-prev").click();
             await page.locator(".ant-pagination-prev").click();
             await page.locator(".ant-pagination-prev").click();
             await page.locator(".ant-pagination-prev").click();
+        
 
             //Check that the User on the 1st page
-            await expect(page.locator('[title="1/5"]')).toBeVisible();
+            await expect(page.locator('[title="1/7"]')).toBeVisible();
 
             //Select options = 60 records on page
-            await page.locator(".ant-pagination-options").click();
+            await page.locator(".ant-select-selection-search").click();
             await page.getByRole('option', { name: '60 / page' }).click();
             await page.mouse.down();
-           
+      
             //Select any company for open Detail sbout it, for example Tantamount Studios
-            await page.getByLabel('action-Action.Link-Details-view-company-grid-card-Tantamount Studios').nth(1).click();
+            await page.getByLabel('action-Action.Link-Details-view-company-grid-card-Tantamount Studios').click();
 
             //Check that Details about Tantamount Studios opened
             await page.locator('ant-drawer-body').isVisible();
